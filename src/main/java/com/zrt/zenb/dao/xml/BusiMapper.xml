@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="busi">
+  <insert id="insertRecordSummary" parameterType="com.zrt.zenb.entity.RecordSummary" useGeneratedKeys="true" keyProperty="id">
+    insert into t_summary (summaryName, res01, res02, res03)
+    values (#{summaryName}, #{res01}, #{res02}, #{res03})
+  </insert>
+  
+  <select id="selectRecordSummary" parameterType="String" resultType="com.zrt.zenb.entity.RecordSummary">
+    select 
+    *
+    from t_summary
+    where summaryName like #{value}
+    order by id desc
+  </select>
+
+  <update id="truncateData">
+  	TRUNCATE t_summary;
+  </update>
+
+</mapper>

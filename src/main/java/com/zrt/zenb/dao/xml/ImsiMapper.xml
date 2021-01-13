@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="imsi">
+  
+  <insert id="insertImsi" parameterType="com.zrt.zenb.entity.ImsiRecord" useGeneratedKeys="true" keyProperty="id">
+    insert into t_imsi (summaryId, imsi, gatherTime, rsrq, res01, res02, res03)
+    values (#{summaryId}, #{imsi}, #{gatherTime}, #{rsrq}, #{msisdn}, #{gatherCount}, #{dataType})
+  </insert>
+
+  <update id="updateImsiCount" parameterType="com.zrt.zenb.entity.ImsiRecord">
+    update t_imsi t set t.res02 = #{gatherCount} where id = #{id}
+  </update>
+
+  <select id="selectImsi" parameterType="Map" resultType="com.zrt.zenb.entity.ImsiRecord">
+    select 
+	    t.id, t.summaryId, t2.summaryName, t.imsi, t.gatherTime, 
+	    t.rsrq, t1.strMSISDN as msisdn, 
+	    t1.strIMEI as imei, t1.strUserAgent as sjDevInfo, t.res02 as gatherCount, t.res03 as dataType
+    from t_imsi t LEFT JOIN t_sjinfo t1 ON t.imsi = t1.strIMSI and t1.strMSISDN != "", t_summary t2 
+    where t.summaryId = t2.id
+    AND t.res03 = '0'
+    <if test="id != null">
+    <![CDATA[
+    	AND t.id < #{id,jdbcType=INTEGER}
+    ]]>
+    </if>
+    <if test="starttime != null">
+    <![CDATA[
+    	AND t.gatherTime > #{starttime, jdbcType=INTEGER}
+    ]]>
+    </if>
+    <if test="endTime != null">
+    <![CDATA[
+    	AND t.gatherTime < #{endTime, jdbcType=INTEGER}
+    ]]>
+    </if>
+    <if test="likeQueryKey != null">
+    <![CDATA[
+    	AND t.imsi like '%${likeQueryKey}%'
+    ]]>
+    </if>
+    <if test="summaryIds != null">
+    <![CDATA[
+    	AND ${summaryIds}
+    ]]>
+    </if>
+    group by t.id
+    order by t.id desc
+    limit 101
+  </select>
+  
+  <update id="truncateData">
+  	TRUNCATE t_imsi;
+  </update>
+  
+  <delete id="deleteHisData" parameterType="Map">
+  <![CDATA[
+  	delete from t_imsi
+  	where gatherTime > #{starttime, jdbcType=INTEGER} 
+  	AND gatherTime < #{endTime, jdbcType=INTEGER}
+  	]]>
+  </delete>
+  
+</mapper>
